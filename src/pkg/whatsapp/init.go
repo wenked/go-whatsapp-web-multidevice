@@ -149,6 +149,18 @@ func handleAppStateSyncComplete(evt *events.AppStateSyncComplete) {
 }
 
 func handlePairSuccess(evt *events.PairSuccess) {
+	body := map[string]interface{}{
+		"code":    "LOGIN_SUCCESS",
+		"message": fmt.Sprintf("Successfully pair with %s", evt.ID.String()),
+		"id":      evt.ID.String(),
+	}
+	for _, url := range config.WhatsappWebhook {
+		err := submitWebhook(body, url)
+		if err != nil {
+			log.Warnf("Failed to submit webhook: %v", err)
+		}
+	}
+
 	websocket.Broadcast <- websocket.BroadcastMessage{
 		Code:    "LOGIN_SUCCESS",
 		Message: fmt.Sprintf("Successfully pair with %s", evt.ID.String()),
